@@ -18,9 +18,9 @@ select '00000000-0000-0000-0000-000000000001', k, d, '12:00', '22:00'
 from unnest(array['service','collection','booking']::hours_kind[]) k, generate_series(0,6) d;
 
 insert into staff (restaurant_id, name, pin_hash, role) values
-  ('00000000-0000-0000-0000-000000000001', 'Manager', crypt('1234', gen_salt('bf')), 'manager'),
-  ('00000000-0000-0000-0000-000000000001', 'Kitchen', crypt('5678', gen_salt('bf')), 'kitchen'),
-  ('00000000-0000-0000-0000-000000000001', 'Sam',     crypt('1111', gen_salt('bf')), 'staff');
+  ('00000000-0000-0000-0000-000000000001', 'Manager', extensions.crypt('1234', extensions.gen_salt('bf')), 'manager'),
+  ('00000000-0000-0000-0000-000000000001', 'Kitchen', extensions.crypt('5678', extensions.gen_salt('bf')), 'kitchen'),
+  ('00000000-0000-0000-0000-000000000001', 'Sam',     extensions.crypt('1111', extensions.gen_salt('bf')), 'staff');
 
 insert into areas (id, restaurant_id, name, sort) values
   ('00000000-0000-0000-0000-0000000000a1', '00000000-0000-0000-0000-000000000001', 'Main', 0),

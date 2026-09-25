@@ -1,7 +1,7 @@
 -- Foodle: multi-tenant restaurant platform
 -- Every tenant-owned row carries restaurant_id; RLS keys off it.
 
-create extension if not exists "pgcrypto";
+create extension if not exists "pgcrypto" with schema extensions;
 
 -- ---------- enums ----------
 create type order_type as enum ('dine_in', 'collection', 'delivery');
@@ -94,7 +94,7 @@ create table tables (
   seats smallint not null default 2,
   bookable boolean not null default true,
   active boolean not null default true,
-  tablet_token text not null unique default encode(gen_random_bytes(12), 'hex'),
+  tablet_token text not null unique default encode(extensions.gen_random_bytes(12), 'hex'),
   sort integer not null default 0
 );
 create index on tables (restaurant_id);
@@ -352,7 +352,7 @@ create policy "admin all print jobs" on print_jobs for all using (is_restaurant_
 -- PIN check happens in SQL so hashes never leave the database.
 create or replace function staff_check_pin(p_restaurant_id uuid, p_pin text)
 returns table (id uuid, name text, role staff_role)
-language sql stable security definer set search_path = public as $$
+language sql stable security definer set search_path = public, extensions as $$
   select s.id, s.name, s.role from staff s
   where s.restaurant_id = p_restaurant_id and s.active
     and s.pin_hash = crypt(p_pin, s.pin_hash)
@@ -362,4 +362,4 @@ revoke all on function staff_check_pin(uuid, text) from public, anon, authentica
 
 -- Hash a PIN when admins create/update staff.
 create or replace function staff_hash_pin(p_pin text) returns text
-language sql immutable as $$ select crypt(p_pin, gen_salt('bf')); $$;
+language sql volatile set search_path = public, extensions as $$ select crypt(p_pin, gen_salt('bf')); $$;
