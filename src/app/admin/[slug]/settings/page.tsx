@@ -31,10 +31,8 @@ export default async function SettingsAdmin({ params }: { params: Promise<{ slug
           <L label="Address line 2"><input className="input" name="address_line2" defaultValue={r.address_line2 ?? ""} /></L>
           <L label="City"><input className="input" name="city" defaultValue={r.city ?? ""} /></L>
           <L label="Postcode"><input className="input" name="postcode" defaultValue={r.postcode ?? ""} /></L>
-          <L label="Logo URL"><input className="input" name="logo_url" defaultValue={r.logo_url ?? ""} /></L>
-          <L label="Hero image URL"><input className="input" name="hero_url" defaultValue={r.hero_url ?? ""} /></L>
         </div>
-        <p className="text-sm text-muted">Colours, fonts and template are on the <a className="font-medium text-primary underline" href={`/admin/${slug}/website`}>Website</a> page.</p>
+        <p className="text-sm text-muted">Logo, header banner, video, gallery, colours, fonts and template are on the <a className="font-medium text-primary underline" href={`/admin/${slug}/website`}>Website</a> page.</p>
         <L label="Description"><textarea className="input" name="description" rows={3} defaultValue={r.description ?? ""} /></L>
       </Section>
 

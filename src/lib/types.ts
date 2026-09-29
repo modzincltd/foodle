@@ -19,6 +19,12 @@ export interface RestaurantSettings {
   vat_rate: number;
 }
 
+export interface GalleryItem {
+  url: string;
+  type: "image" | "video";
+  caption?: string;
+}
+
 export interface Restaurant {
   id: string;
   slug: string;
@@ -35,6 +41,8 @@ export interface Restaurant {
   timezone: string;
   logo_url: string | null;
   hero_url: string | null;
+  hero_video_url: string | null;
+  gallery: GalleryItem[];
   theme: ThemeJson;
   settings: RestaurantSettings;
 }

@@ -4,11 +4,18 @@ import { SiteShell } from "@/components/site/SiteShell";
 import { HomeContent, type HomeData } from "@/components/site/HomeContent";
 import { FONTS, TEMPLATES, googleFontsHref, themeVars, type SiteTheme, type TemplateId } from "@/lib/site/theme";
 import { SubmitButton } from "../settings/SubmitButton";
+import { MediaPanel, type Media } from "./MediaPanel";
 
 export function WebsiteEditor({ initial, data, action }: { initial: SiteTheme; data: HomeData; action: (fd: FormData) => Promise<void> }) {
   const [t, setT] = useState<SiteTheme>(initial);
   const [saved, setSaved] = useState<SiteTheme>(initial);
   const [device, setDevice] = useState<"desktop" | "mobile">("desktop");
+  const [tab, setTab] = useState<"design" | "media">("design");
+  const [media, setMedia] = useState<Media>({
+    logo_url: data.restaurant.logo_url, hero_url: data.restaurant.hero_url,
+    hero_video_url: data.restaurant.hero_video_url, gallery: data.restaurant.gallery ?? [],
+  });
+  const restaurant = { ...data.restaurant, ...media };
   const dirty = JSON.stringify(t) !== JSON.stringify(saved);
   const set = <K extends keyof SiteTheme>(k: K, v: SiteTheme[K]) => setT((p) => ({ ...p, [k]: v }));
 
@@ -36,6 +43,15 @@ export function WebsiteEditor({ initial, data, action }: { initial: SiteTheme; d
           <a href={`/r/${data.restaurant.slug}`} target="_blank" className="text-sm text-muted hover:text-foreground">View live ↗</a>
         </div>
 
+        <div className="flex gap-1 rounded-xl bg-black/5 p-1 text-sm font-semibold">
+          {(["design", "media"] as const).map((x) => (
+            <button key={x} type="button" onClick={() => setTab(x)} className={`flex-1 rounded-lg py-1.5 capitalize ${tab === x ? "bg-card shadow-sm" : "text-muted"}`}>{x === "media" ? "Logo & media" : "Design"}</button>
+          ))}
+        </div>
+
+        {tab === "media" && <MediaPanel slug={data.restaurant.slug} media={media} onChange={setMedia} />}
+
+        <div className={tab === "design" ? "space-y-6" : "hidden"}>
         <section className="space-y-2">
           <h2 className="text-sm font-bold uppercase tracking-wide text-muted">Template</h2>
           {TEMPLATES.map((tpl) => (
@@ -68,8 +84,9 @@ export function WebsiteEditor({ initial, data, action }: { initial: SiteTheme; d
           <Colour label="Accent (highlights)" value={t.accent} onChange={(v) => set("accent", v)} />
           <p className="text-xs text-muted">Text colour adjusts automatically for light or dark backgrounds.</p>
         </section>
+        </div>
 
-        <div className="sticky bottom-0 flex items-center gap-3 bg-background py-3">
+        <div className={`sticky bottom-0 items-center gap-3 bg-background py-3 ${tab === "design" ? "flex" : "hidden"}`}>
           <SubmitButton />
           {dirty && <button type="button" className="btn-ghost" onClick={() => setT(saved)}>Discard</button>}
           <span className="text-xs text-muted">{dirty ? "Unsaved changes" : "Saved"}</span>
@@ -87,8 +104,8 @@ export function WebsiteEditor({ initial, data, action }: { initial: SiteTheme; d
         </div>
         <div className="flex-1 overflow-y-auto p-4">
           <div inert className={`mx-auto overflow-hidden rounded-xl shadow-lg transition-all ${device === "mobile" ? "max-w-[390px]" : "max-w-full"}`}>
-            <SiteShell restaurant={data.restaurant} theme={t}>
-              <HomeContent theme={t} {...data} />
+            <SiteShell restaurant={restaurant} theme={t}>
+              <HomeContent theme={t} {...data} restaurant={restaurant} />
             </SiteShell>
           </div>
         </div>

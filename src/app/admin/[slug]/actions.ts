@@ -191,7 +191,6 @@ export async function saveSettings(slug: string, fd: FormData) {
     name: str(fd.get("name")), tagline: str(fd.get("tagline")) || null, description: str(fd.get("description")) || null,
     phone: str(fd.get("phone")) || null, email: str(fd.get("email")) || null,
     address_line1: str(fd.get("address_line1")) || null, address_line2: str(fd.get("address_line2")) || null, city: str(fd.get("city")) || null, postcode: str(fd.get("postcode")) || null,
-    logo_url: str(fd.get("logo_url")) || null, hero_url: str(fd.get("hero_url")) || null,
     settings,
   };
   await supabaseAdmin().from("restaurants").update(row).eq("id", r.id);
@@ -222,6 +221,55 @@ export async function saveWebsite(slug: string, fd: FormData) {
   const theme = websiteSchema.parse(Object.fromEntries(["template", "primary", "accent", "background", "heading_font", "body_font"].map((k) => [k, str(fd.get(k))])));
   const { error } = await supabaseAdmin().from("restaurants").update({ theme: { ...r.theme, ...theme } }).eq("id", r.id);
   if (error) throw new Error(error.message);
+  done(slug, "website");
+}
+
+// ---------- website media ----------
+
+const MEDIA_BUCKET = "site-media";
+const MEDIA_TYPES: Record<string, string> = {
+  "image/png": "png", "image/jpeg": "jpg", "image/webp": "webp", "image/gif": "gif", "image/svg+xml": "svg",
+  "video/mp4": "mp4", "video/webm": "webm", "video/quicktime": "mov",
+};
+const MAX_IMAGE = 10 * 1024 * 1024;
+const MAX_VIDEO = 100 * 1024 * 1024;
+
+/** Signed URL the browser uploads straight to (keeps big videos out of server actions). */
+export async function createMediaUpload(slug: string, kind: "logo" | "hero" | "video" | "gallery", contentType: string, size: number) {
+  const r = await requireAdmin(slug);
+  const ext = MEDIA_TYPES[contentType];
+  if (!ext) throw new Error("Unsupported file type");
+  const isVideo = contentType.startsWith("video/");
+  if (kind === "video" && !isVideo) throw new Error("Header video must be MP4, WebM or MOV");
+  if ((kind === "logo" || kind === "hero") && isVideo) throw new Error("Please upload an image");
+  if (size > (isVideo ? MAX_VIDEO : MAX_IMAGE)) throw new Error(`File too large (max ${isVideo ? "100" : "10"} MB)`);
+  const path = `${r.id}/${kind}/${crypto.randomUUID()}.${ext}`;
+  const storage = supabaseAdmin().storage.from(MEDIA_BUCKET);
+  const { data, error } = await storage.createSignedUploadUrl(path);
+  if (error || !data) throw new Error(error?.message ?? "Could not start upload");
+  return { path, token: data.token, publicUrl: storage.getPublicUrl(path).data.publicUrl };
+}
+
+const mediaUrl = z.string().url().nullable();
+const mediaSchema = z.object({
+  logo_url: mediaUrl, hero_url: mediaUrl, hero_video_url: mediaUrl,
+  gallery: z.array(z.object({ url: z.string().url(), type: z.enum(["image", "video"]), caption: z.string().max(200).optional() })).max(24),
+}).partial();
+
+/** Save media fields; files that are no longer used are removed from storage. */
+export async function saveMedia(slug: string, patch: z.infer<typeof mediaSchema>) {
+  const r = await requireAdmin(slug);
+  const next = mediaSchema.parse(patch);
+  const { error } = await supabaseAdmin().from("restaurants").update(next).eq("id", r.id);
+  if (error) throw new Error(error.message);
+
+  const used = (x: { logo_url?: string | null; hero_url?: string | null; hero_video_url?: string | null; gallery?: { url: string }[] | null }) =>
+    [x.logo_url, x.hero_url, x.hero_video_url, ...(x.gallery ?? []).map((g) => g.url)].filter(Boolean) as string[];
+  const nowUsed = new Set(used({ ...r, ...next }));
+  const marker = `/storage/v1/object/public/${MEDIA_BUCKET}/`;
+  const orphans = used(r).filter((u) => !nowUsed.has(u) && u.includes(marker)).map((u) => u.split(marker)[1])
+    .filter((p) => p.startsWith(`${r.id}/`));
+  if (orphans.length) await supabaseAdmin().storage.from(MEDIA_BUCKET).remove(orphans);
   done(slug, "website");
 }
 

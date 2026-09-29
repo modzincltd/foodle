@@ -11,7 +11,7 @@ export function SiteShell({ restaurant: r, theme, children }: { restaurant: Rest
     ...(r.settings.booking_enabled ? [["Book a table", `${base}/book`] as [string, string]] : []),
   ];
   const address = [r.address_line1, r.city, r.postcode].filter(Boolean).join(", ");
-  const logo = r.logo_url ? <img src={r.logo_url} alt="" className="h-9 w-9 rounded-full object-cover" /> : <span className="h-9 w-9 rounded-full bg-primary" />;
+  const logo = r.logo_url ? <img src={r.logo_url} alt="" className="h-10 w-auto max-w-40 object-contain" /> : <span className="h-9 w-9 rounded-full bg-primary" />;
 
   return (
     <div style={themeVars(theme)} className={`site site-${theme.template} flex min-h-screen flex-col`}>
@@ -43,7 +43,10 @@ export function SiteShell({ restaurant: r, theme, children }: { restaurant: Rest
       {theme.template === "bistro" && (
         <header className="border-b border-border">
           <div className="mx-auto max-w-4xl px-4 pt-8 pb-4 text-center">
-            <Link href={base} className="heading inline-block text-4xl italic">{r.name}</Link>
+            <Link href={base} className="heading inline-flex flex-col items-center gap-2 text-4xl italic">
+              {r.logo_url && <img src={r.logo_url} alt="" className="h-16 w-auto max-w-56 object-contain" />}
+              {r.name}
+            </Link>
             {r.tagline && <div className="mt-1 text-xs uppercase tracking-[0.3em] text-accent">{r.tagline}</div>}
             <nav className="mt-4 flex justify-center gap-8 text-sm uppercase tracking-widest">
               {nav.map(([label, href]) => <Link key={href} href={href} className="hover:text-primary">{label}</Link>)}
