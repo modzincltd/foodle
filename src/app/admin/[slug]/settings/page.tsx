@@ -33,9 +33,8 @@ export default async function SettingsAdmin({ params }: { params: Promise<{ slug
           <L label="Postcode"><input className="input" name="postcode" defaultValue={r.postcode ?? ""} /></L>
           <L label="Logo URL"><input className="input" name="logo_url" defaultValue={r.logo_url ?? ""} /></L>
           <L label="Hero image URL"><input className="input" name="hero_url" defaultValue={r.hero_url ?? ""} /></L>
-          <L label="Brand colour"><input className="input" type="color" name="theme_primary" defaultValue={r.theme.primary} /></L>
-          <L label="Accent colour"><input className="input" type="color" name="theme_accent" defaultValue={r.theme.accent} /></L>
         </div>
+        <p className="text-sm text-muted">Colours, fonts and template are on the <a className="font-medium text-primary underline" href={`/admin/${slug}/website`}>Website</a> page.</p>
         <L label="Description"><textarea className="input" name="description" rows={3} defaultValue={r.description ?? ""} /></L>
       </Section>
 

@@ -7,6 +7,7 @@ import { notifyRestaurant } from "@/lib/data/realtime";
 import { createBooking, setBookingStatus } from "@/lib/data/bookings";
 import { setOrderStatus } from "@/lib/data/orders";
 import type { BookingStatus, OrderStatus } from "@/lib/types";
+import { FONTS, TEMPLATES } from "@/lib/site/theme";
 
 const num = (v: FormDataEntryValue | null, d = 0) => (v === null || v === "" ? d : Number(v));
 const str = (v: FormDataEntryValue | null) => (typeof v === "string" ? v.trim() : "");
@@ -191,7 +192,6 @@ export async function saveSettings(slug: string, fd: FormData) {
     phone: str(fd.get("phone")) || null, email: str(fd.get("email")) || null,
     address_line1: str(fd.get("address_line1")) || null, address_line2: str(fd.get("address_line2")) || null, city: str(fd.get("city")) || null, postcode: str(fd.get("postcode")) || null,
     logo_url: str(fd.get("logo_url")) || null, hero_url: str(fd.get("hero_url")) || null,
-    theme: { primary: str(fd.get("theme_primary")) || "#c2410c", accent: str(fd.get("theme_accent")) || "#fbbf24" },
     settings,
   };
   await supabaseAdmin().from("restaurants").update(row).eq("id", r.id);
@@ -205,6 +205,24 @@ export async function saveSettings(slug: string, fd: FormData) {
   }
   if (rows.length) await db.from("opening_hours").insert(rows);
   done(slug, "settings");
+}
+
+// ---------- website ----------
+
+const hex = z.string().regex(/^#[0-9a-f]{6}$/i);
+const fontName = z.enum(FONTS.map((f) => f.name) as [string, ...string[]]);
+const websiteSchema = z.object({
+  template: z.enum(TEMPLATES.map((t) => t.id) as [string, ...string[]]),
+  primary: hex, accent: hex, background: hex,
+  heading_font: fontName, body_font: fontName,
+});
+
+export async function saveWebsite(slug: string, fd: FormData) {
+  const r = await requireAdmin(slug);
+  const theme = websiteSchema.parse(Object.fromEntries(["template", "primary", "accent", "background", "heading_font", "body_font"].map((k) => [k, str(fd.get(k))])));
+  const { error } = await supabaseAdmin().from("restaurants").update({ theme: { ...r.theme, ...theme } }).eq("id", r.id);
+  if (error) throw new Error(error.message);
+  done(slug, "website");
 }
 
 // ---------- bookings / orders ----------

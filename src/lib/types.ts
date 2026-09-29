@@ -1,3 +1,4 @@
+import type { ThemeJson } from "@/lib/site/theme";
 export type OrderType = "dine_in" | "collection" | "delivery";
 export type OrderStatus = "draft" | "placed" | "accepted" | "preparing" | "ready" | "completed" | "cancelled";
 export type PaymentStatus = "unpaid" | "paid" | "refunded";
@@ -34,7 +35,7 @@ export interface Restaurant {
   timezone: string;
   logo_url: string | null;
   hero_url: string | null;
-  theme: { primary: string; accent: string };
+  theme: ThemeJson;
   settings: RestaurantSettings;
 }
 

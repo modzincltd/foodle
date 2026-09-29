@@ -49,7 +49,7 @@ body {
 }
 .btn:active, .btn-primary:active, .btn-ghost:active, .btn-dark:active { transform: scale(.98); }
 .btn:disabled, .btn-primary:disabled, .btn-ghost:disabled, .btn-dark:disabled { opacity: .5; pointer-events: none; }
-.btn-primary { background: var(--primary); color: #fff; }
+.btn-primary { background: var(--primary); color: var(--on-primary, #fff); }
 .btn-primary:hover { filter: brightness(1.1); }
 .btn-ghost { background: transparent; border: 1px solid var(--border); }
 .btn-ghost:hover { background: rgb(0 0 0 / .05); }
@@ -62,3 +62,7 @@ body {
 .input:focus { box-shadow: 0 0 0 2px color-mix(in srgb, var(--primary) 40%, transparent); }
 .card { border-radius: 1rem; border: 1px solid var(--border); background: var(--card); }
 .chip { display: inline-flex; align-items: center; border-radius: 9999px; padding: .125rem .5rem; font-size: .75rem; font-weight: 500; }
+
+/* Public website: fonts come from the restaurant's theme (see src/lib/site/theme.ts). */
+.site { font-family: var(--font-body); background: var(--background); color: var(--foreground); }
+.site :is(h1, h2, h3, h4, .heading) { font-family: var(--font-heading); }

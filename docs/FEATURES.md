@@ -81,6 +81,8 @@ Legend: ✅ built in v0.1 · 🔜 next · ⬜ backlog
 
 ## Also in scope (from project brief)
 - ✅ Public website per restaurant
+- ✅ Website builder (admin → Website): 3 templates (Classic, Modern, Bistro), heading/body fonts from a set list, background/brand/accent colours, live desktop/mobile preview
+- ⬜ Website builder v2: custom pages, gallery, logo/hero upload, custom domains
 - ✅ Collection ordering
 - ⬜ Delivery (own drivers + courier adapter)
 - ✅ Tablet menu at table (QR / tablet token)

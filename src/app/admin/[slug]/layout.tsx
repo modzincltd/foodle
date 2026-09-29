@@ -4,7 +4,7 @@ import { SignOut } from "./SignOut";
 
 const NAV = [
   ["", "Overview"], ["orders", "Orders"], ["bookings", "Bookings"], ["menu", "Menu"],
-  ["tables", "Tables"], ["staff", "Staff"], ["settings", "Settings"],
+  ["tables", "Tables"], ["website", "Website"], ["staff", "Staff"], ["settings", "Settings"],
 ] as const;
 
 export default async function AdminLayout({ children, params }: { children: React.ReactNode; params: Promise<{ slug: string }> }) {
