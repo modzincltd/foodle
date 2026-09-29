@@ -9,6 +9,8 @@ export default async function AdminLogin({ searchParams }: { searchParams: Promi
         <p className="mb-4 text-sm text-muted">Sign in to manage your restaurant.</p>
         <LoginForm next={next} />
       </div>
+
+      
     </main>
   );
 }
